@@ -1,6 +1,10 @@
 import argparse
 from argparse import ArgumentParser, _SubParsersAction
-from pathlib import Path
+
+def _result_filename(value: str) -> str:
+    if not value or value in {".", ".."} or "/" in value or "\\" in value:
+        raise argparse.ArgumentTypeError("expected only a filename, for example ls.json")
+    return value
 
 def _add_record(parser: _SubParsersAction):
     record_parser = parser.add_parser("record")
@@ -11,10 +15,10 @@ def _add_record(parser: _SubParsersAction):
 
 def _add_compare(parser: _SubParsersAction):
     compare_parser = parser.add_parser("compare")
-    compare_parser.add_argument('--baseline', type=Path, help="Baseline result to check against")
-    compare_parser.add_argument('--current', type=Path, help="Current result to check against")
-    compare_parser.add_argument('--max-time-regression', type=Path, help="Max time regression")
-    compare_parser.add_argument('--max-memory-regression', type=Path, help="Max memory regression")
+    compare_parser.add_argument('--baseline', type=_result_filename, required=True, help="Filename in results/benchmark (for example ls.json)")
+    compare_parser.add_argument('--current', type=_result_filename, required=True, help="Filename in results/readings (for example ls.json)")
+    compare_parser.add_argument('--max-time-regression', type=float, default=20, help="Max time regression (default: 20%%)")
+    compare_parser.add_argument('--max-memory-regression', type=float, default=20, help="Max memory regression (default: 20%%)")
     return compare_parser
 
 def main():
@@ -30,7 +34,11 @@ def main():
         except Exception as e:
             print(f"Error while recording results: {e}")
     elif args.action == 'compare':
-        pass
+        from src.compare_results.comparison import compare_results
+        try:
+            compare_results(args)
+        except Exception as e:
+            print(f"Error while comparing results: {e}")           
 
 if __name__ == "__main__":
     main()
