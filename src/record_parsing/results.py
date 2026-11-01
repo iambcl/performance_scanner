@@ -54,6 +54,7 @@ def measure(command: list[str]):
     _, status, usage = os.wait4(process.pid,0)
     time_ended = time.perf_counter()
     return_code = os.waitstatus_to_exitcode(status)
+    process.returncode = return_code
     peak_rss_bytes = usage.ru_maxrss
 
     if sys.platform.startswith("linux"):
