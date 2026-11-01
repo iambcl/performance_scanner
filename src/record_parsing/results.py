@@ -36,7 +36,7 @@ def record_action(args: Namespace):
         exit_code=max(result.exit_code for result in result_record),
     )
 
-    output_path = Path(f"{record_name}.json")
+    output_path = Path(f"results/{record_name}.json")
     output_path.write_text(
         json.dumps(asdict(max_results), indent=2) + "\n",
         encoding="utf-8",
