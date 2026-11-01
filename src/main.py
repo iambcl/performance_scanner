@@ -24,6 +24,13 @@ def main():
     _add_compare(subparsers)
     args = parser.parse_args()
     if args.action == 'record':
-        pass
+        from src.record_parsing.results import record_action
+        try:
+            record_action(args)
+        except Exception as e:
+            print(f"Error while recording results: {e}")
     elif args.action == 'compare':
         pass
+
+if __name__ == "main":
+    main()
