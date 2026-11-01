@@ -1,5 +1,6 @@
 import argparse
 from argparse import ArgumentParser, _SubParsersAction
+from pathlib import Path
 
 def _add_record(parser: _SubParsersAction):
     record_parser = parser.add_parser("record")
@@ -8,13 +9,21 @@ def _add_record(parser: _SubParsersAction):
     record_parser.add_argument('command', nargs=argparse.REMAINDER)
     return record_parser
 
+def _add_compare(parser: _SubParsersAction):
+    compare_parser = parser.add_parser("compare")
+    compare_parser.add_argument('--baseline', type=Path, help="Baseline result to check against")
+    compare_parser.add_argument('--current', type=Path, help="Current result to check against")
+    compare_parser.add_argument('--max-time-regression', type=Path, help="Max time regression")
+    compare_parser.add_argument('--max-memory-regression', type=Path, help="Max memory regression")
+    return compare_parser
+
 def main():
     parser = argparse.ArgumentParser(description="Performance Scanner")
-    subparsers = parser.add_subparsers(dest="command")
-    parser.add_argument('--name', type=str, help='Your name')
+    subparsers = parser.add_subparsers(dest="action", required=True)
+    _add_record(subparsers)
+    _add_compare(subparsers)
     args = parser.parse_args()
-
-    if args.name:
-        print(f"Hello, {args.name}!")
-    else:
-        print("Hello, World!")
+    if args.action == 'record':
+        pass
+    elif args.action == 'compare':
+        pass
