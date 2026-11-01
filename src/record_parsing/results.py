@@ -41,12 +41,16 @@ def record_action(args: Namespace):
         json.dumps(asdict(max_results), indent=2) + "\n",
         encoding="utf-8",
     )
+    print("Saved max readings at {output_path}.")
+    print(json.dumps(asdict(max_results), indent=2))
     return 
 
 
 def measure(command: list[str]):
     time_started = time.perf_counter()
-    process = subprocess.Popen(command)
+    process = subprocess.Popen(command,
+                               stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL,)
     _, status, usage = os.wait4(process.pid,0)
     time_ended = time.perf_counter()
     return_code = os.waitstatus_to_exitcode(status)

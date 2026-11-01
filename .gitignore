@@ -2,3 +2,5 @@
 .vscode
 __pycache__/
 *.py[cod]
+src/record_parsing/__pycache__
+*.json
