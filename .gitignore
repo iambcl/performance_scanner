@@ -1,2 +1,5 @@
 .venv
 .vscode
+__pycache__/
+*.py[cod]
+src/record_parsing/__pycache__
