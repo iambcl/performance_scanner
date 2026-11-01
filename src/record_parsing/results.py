@@ -11,8 +11,8 @@ PROCESS_SUCCESS = 0
 
 @dataclass
 class Results:
-    wall_seconds: int
-    cpu_seconds: int
+    wall_seconds: float
+    cpu_seconds: float
     peak_rss_bytes: int
     exit_code: int
 
