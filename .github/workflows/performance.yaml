@@ -1,0 +1,73 @@
+name: Performance Scanner
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  performance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Select baseline revision
+        id: baseline
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
+            BASE_SHA=$(git rev-parse --verify HEAD^ 2>/dev/null || git rev-parse HEAD)
+          fi
+          echo "sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Check out baseline
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.baseline.outputs.sha }}
+          path: .baseline
+          persist-credentials: false
+
+      - name: Record baseline and current performance
+        run: |
+          mkdir -p results/benchmark results/readings
+          python -m src.main record \
+            --name benchmark/record-workload \
+            --runs 5 \
+            python benchmarks/record_workload.py --source .baseline
+          python -m src.main record \
+            --name readings/record-workload \
+            --runs 5 \
+            python benchmarks/record_workload.py --source .
+
+      - name: Compare against baseline
+        run: |
+          python -m src.main compare \
+            --baseline record-workload.json \
+            --current record-workload.json \
+            --max-time-regression 20 \
+            --max-memory-regression 20
+
+      - name: Save results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: |
+            results/benchmark/record-workload.json
+            results/readings/record-workload.json
