@@ -16,7 +16,7 @@ class Results:
     peak_rss_bytes: int
     exit_code: int
 
-def record_action(args: Namespace):
+def record_action(args: Namespace) -> Results:
     record_name, record_runs = args.name, args.runs
     if record_runs < 1:
         raise ValueError("runs must be at least 1")
@@ -41,9 +41,9 @@ def record_action(args: Namespace):
         json.dumps(asdict(max_results), indent=2) + "\n",
         encoding="utf-8",
     )
-    print("Saved max readings at {output_path}.")
+    print(f"Saved max readings at {output_path}.")
     print(json.dumps(asdict(max_results), indent=2))
-    return 
+    return max_results
 
 
 def measure(command: list[str]):
